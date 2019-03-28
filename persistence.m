@@ -76,11 +76,12 @@ classdef persistence
       normalizedImage = nr.normalize(compositeImage);
 
       %% noise removal
-      %% se = strel('disk', 4, 0);
-      %% normalizedImage = medfilt2(normalizedImage);
-      %% background = imopen(normalizedImage, se);
-      %% normalizedImage = normalizedImage - background;
-
+      %se = strel('disk', 5, 0);
+      %normalizedImage = medfilt2(normalizedImage);
+      %background = imopen(normalizedImage, se);
+      %normalizedImage = normalizedImage - background;
+      %normalizedImage(normalizedImage < 0.2) = 0;
+      
       name = strcat('O', num2str(idx), '.png');
       outputFileName = fullfile(obj.outputDir, name);
       imwrite(normalizedImage, outputFileName);

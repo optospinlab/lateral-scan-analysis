@@ -64,7 +64,7 @@ classdef normalizer
 
     function normalizedData = normalize(obj, data)
       %%normalizedData = mat2gray(data, [obj.mode, obj.mode + 3*obj.aboveModeStd]);
-      normalizedData = mat2gray(data, [obj.a/2, obj.b]);
+      normalizedData = mat2gray(data, [obj.a/2, obj.b/1.3]);
     endfunction
   end
 endclassdef
