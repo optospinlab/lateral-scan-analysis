@@ -187,10 +187,10 @@ function alignment = stitchPairHorizontal(leftImage, rightImage)
   imwrite(combined, strcat(leftImageName, '_', rightImageName, '.png'))
 end
 
-function rawData = discoverRawData(baseDir)
-  lsData = load(fullfile(baseDir, 'lsData.mat')).lsData;
+function rawData = discoverRawData(inputDir)
+  lsData = load(fullfile(inputDir, 'lsData.mat')).lsData;
 
-  a = load(fullfile(baseDir, 'piezoSpeed.mat')); %% does this ever change?
+  %% a = load(fullfile(baseDir, 'piezoSpeed.mat')); %% does this ever change?
   %% y up x to the right
 
   rawData = {{}, {}};
