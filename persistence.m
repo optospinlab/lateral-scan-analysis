@@ -47,8 +47,8 @@ classdef persistence
     endfunction
     
     function writeOrientation(obj, idx)
-      maxRow = obj.coordinates{end}(1) + 100;
-      maxColumn = obj.coordinates{end}(2) + 100;
+      maxRow = int32(obj.coordinates{end}(1) + 100);
+      maxColumn = int32(obj.coordinates{end}(2) + 100);
       
       compositeImage = zeros(maxRow, maxColumn, 'uint32');
 
