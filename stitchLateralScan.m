@@ -1,7 +1,11 @@
-function stitchLateralScan(inputDir, outputDir)
+function stitchLateralScan(inputDir, outputDir, flipOrientations)
   pkg load image;
   
   rawData = discoverRawData(inputDir);
+
+  if flipOrientations
+    rawData = flip(rawData);
+  end
   %%nr = normalizer(rawData);
   %%return;
   bestAlignments = {};

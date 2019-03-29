@@ -17,7 +17,7 @@ classdef persistence
 
     function write(obj)
       obj.writeTiles();
-      for i = 1:length(obj.rawData)
+      for i = 0:length(obj.rawData)
         obj.writeOrientation(i);
       end
       obj.writeComposite();
@@ -52,8 +52,8 @@ classdef persistence
       
       compositeImage = zeros(maxRow, maxColumn, 'uint32');
 
-      iMax = size(obj.rawData{idx}, 1);
-      jMax = size(obj.rawData{idx}, 2);
+      iMax = size(obj.rawData{1}, 1);
+      jMax = size(obj.rawData{1}, 2);
   
       for i = 1:iMax
         for j = 1:jMax
@@ -63,7 +63,11 @@ classdef persistence
             continue
           end
 
-          img = obj.rawData{idx}{i, j};
+          if idx == 0
+            img = ones(size(obj.rawData{1}{i, j}));
+          else
+            img = obj.rawData{idx}{i, j};
+          end
           [h, w] = size(img);
           row = round(obj.coordinates{v}(1));
           col = round(obj.coordinates{v}(2));
@@ -72,8 +76,12 @@ classdef persistence
         end
       end
 
-      nr = normalizer(obj.rawData);
-      normalizedImage = nr.normalize(compositeImage);
+      if idx != 0
+        nr = normalizer(obj.rawData);
+        normalizedImage = nr.normalize(compositeImage);
+      else
+        normalizedImage = mat2gray(compositeImage);
+      end
 
       %% noise removal
       %se = strel('disk', 5, 0);
@@ -85,21 +93,21 @@ classdef persistence
       name = strcat('O', num2str(idx), '.png');
       outputFileName = fullfile(obj.outputDir, name);
       imwrite(normalizedImage, outputFileName);
-
-      f = figure("visible", "off"); hold on;
-      histFileName = fullfile(obj.outputDir, strcat('hist_', name));
-      hist(normalizedImage(normalizedImage > 0.1 & normalizedImage < 0.6));
-      print(f, '-dpng', histFileName);
-      hold off;
     endfunction
 
     function writeComposite(obj)
+      pathZero = fullfile(obj.outputDir, 'O0.png');
       pathOne = fullfile(obj.outputDir, 'O1.png');
       pathTwo = fullfile(obj.outputDir, 'O2.png');
+
+      frame = imread(pathZero)==0;
       A = imread(pathOne);
       B = imread(pathTwo);
 
-      C = cat(3, B, A, zeros(size(A)));
+      A = A - A.*frame + frame * intmax('uint16');
+      B = B - B.*frame + frame * intmax('uint16');
+      
+      C = cat(3, B, A, frame * intmax('uint16'));
       
       outputPath = fullfile(obj.outputDir, 'fused.png');
       imwrite(C, outputPath);
