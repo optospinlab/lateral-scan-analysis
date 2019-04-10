@@ -51,7 +51,9 @@ scans = struct(
             }
           );
 
-override{12} = '/home/andrew/school/lab/graph.csv';
+
+%% override{12} = '/home/andrew/school/lab/graph.csv';
+override = cell(length(scans));
 
 skip = [1 2 3 4 5 6 7 8 9 10 11];
 
