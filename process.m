@@ -4,21 +4,6 @@ baseDir = '/home/andrew/school/lab/raw_data/';
 outputDir = '/home/andrew/school/lab/processed/';
 
 scans = struct(
-            'label',
-            {
-             'pre',
-             '950C\n10hr',
-             '960C\n10hr',
-             '960C\n10hr',
-             '970C\n2hr',
-             '970C\n20hr',
-             '980C\n2hr',
-             '980C\n150hr',
-             '980C\n150hr',
-             '1000C\n150hr',
-             '1050C\n150hr',
-             '1050C\n150hr'
-            },
             'in',
             {
              'CVD20/CVD20_preanneal/Large scans/2017_10_31_CVD20',
@@ -64,9 +49,11 @@ scans = struct(
              '11-1050C_150hr',
              '12-1050C_150hr_2'
             }
-);
+          );
 
-skip = [1 2 3 4 5 6 7 8 9 10 11 12];
+override{12} = '/home/andrew/school/lab/graph.csv';
+
+skip = [1 2 3 4 5 6 7 8 9 10 11];
 
 %% skip = [];
 
@@ -76,27 +63,11 @@ for i = 1:length(scans)
   endif
   scanPath = fullfile(baseDir, scans(i).in);
   outputPath = fullfile(outputDir, scans(i).out);
-  stitchLateralScan(scanPath, outputPath, scans(i).flip);
+
+  overrideAlignments = [];
+  if !isempty(override{i})
+    overrideAlignments = csvread(override{i});
+  end
+  stitchLateralScan(scanPath, outputPath, scans(i).flip, overrideAlignments);
 end
 
-o1counts = [];
-o2counts = [];
-
-for i = 1:length(scans)
-  scanPath = fullfile(outputDir, scans(i).out, 'fused.png');
-  [c1, c2] = countDots(scanPath);
-  o1counts = [o1counts c1];
-  o2counts = [o2counts c2];
-end
-
-f = figure('visible', 'off');
-
-bar([o1counts' o2counts'], 'stacked');
-set(gca,'XTickLabel', {scans.label});
-
-p = get(gca, "outerposition");
-
-set(gca,'OuterPosition',[p(1) p(2) + 0.05 p(3) p(4) - 0.05]);
-set(gca, "fontsize", 24);
-
-print(f, '-dpng', 'counts.png', '-S1280,720');

@@ -1,4 +1,4 @@
-function stitchLateralScan(inputDir, outputDir, flipOrientations)
+function stitchLateralScan(inputDir, outputDir, flipOrientations, overrideAlignments)
   pkg load image;
   
   rawData = discoverRawData(inputDir);
@@ -29,9 +29,23 @@ function stitchLateralScan(inputDir, outputDir, flipOrientations)
     fprintf('[Orientation %d] Done.\n', i);
   end
 
-  [coordinates, adjacency] = computeBestAlignment(bestAlignments, numel(rawData{i}));
+  %% apply overrides
+  for i = 1:size(overrideAlignments, 1)
+    a = overrideAlignments(i, 1);
+    b = overrideAlignments(i, 2);
+    columnOffset = overrideAlignments(i, 3);
+    rowOffset = overrideAlignments(i, 4);
+    
+    bestAlignments{a, b}.rowOffset = rowOffset;
+    bestAlignments{a, b}.columnOffset = columnOffset;
+    bestAlignments{a, b}.error = 0;
+    
+    bestAlignments{b, a} = bestAlignments{a, b};
+  end
 
-  p = persistence(outputDir, rawData, coordinates, adjacency);
+  [coordinates, adjacency] = computeBestAlignment(bestAlignments, numel(rawData{1}));
+
+  p = persistence(outputDir, rawData, coordinates, adjacency, bestAlignments);
   p.write();
 end
 

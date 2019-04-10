@@ -4,13 +4,15 @@ classdef persistence
     rawData;
     coordinates;
     adjacency;
+    bestAlignments;
   endproperties
   methods
-    function obj = persistence(outputDir, rawData, coordinates, adjacency)
+    function obj = persistence(outputDir, rawData, coordinates, adjacency, bestAlignments)
       obj.outputDir = outputDir;
       obj.rawData = rawData;
       obj.coordinates = coordinates;
       obj.adjacency = adjacency;
+      obj.bestAlignments = bestAlignments;
       mkdir(outputDir);
       mkdir(outputDir, 'tiles');
     endfunction
@@ -115,21 +117,56 @@ classdef persistence
 
     function writeGraph(obj)
       backgroundImagePath = fullfile(obj.outputDir, 'fused.png');
-      fileNameOut = "graph.png";
       img = imread(backgroundImagePath);
       img = rgb2gray(img);
-      f = figure('visible', 'off'); hold on; axis equal;
+      f = figure('visible', 'off'); hold on; %%axis equal;
       imshow(img, 'Colormap', gray(255));
       axis image; axis ij;
       for i = 1:length(obj.adjacency)
-        A = obj.coordinates{obj.adjacency(i, 1)} + 75;
-        B = obj.coordinates{obj.adjacency(i, 2)} + 75;
+        a = obj.adjacency(i, 1);
+        b = obj.adjacency(i, 2);
+        aCoordinates = obj.coordinates{a};
+        bCoordinates = obj.coordinates{b};
+
+        aCenter = aCoordinates + 75;
+        bCenter = bCoordinates + 75;
         
-        line([A(2), B(2)], [A(1), B(1)], 'LineWidth', 3, 'Color', 'yellow', 'marker', 's', 'markerfacecolor', 'yellow');
+        line([aCenter(2), bCenter(2)], [aCenter(1), bCenter(1)],
+             'LineWidth', 3, 'Color', 'yellow', 'marker', 's',
+             'markerfacecolor', 'yellow', 'markersize', 12);
+
+        text(aCenter(2)-7, aCenter(1), num2str(a), 'Color', 'blue');
+        text(bCenter(2)-7, bCenter(1), num2str(b), 'Color', 'blue');
       end
-      outputFileName = fullfile(obj.outputDir, fileNameOut);
-      print(f, '-dpng', outputFileName);
+      outputFileName = fullfile(obj.outputDir, 'graph.png');
+      print(f, '-dpng', outputFileName, '-S1280');
       hold off;
+
+      graphData = [];
+      for i = 1:length(obj.adjacency)
+        sortedPair = sort(obj.adjacency(i, :));
+        a = sortedPair(1);
+        b = sortedPair(2);
+        
+        graphData = [graphData; a b obj.bestAlignments{a, b}.columnOffset obj.bestAlignments{a, b}.rowOffset];
+      end
+      csvFileName = fullfile(obj.outputDir, 'graph.csv');
+      graphData = sortrows(graphData);
+      graphData = round(graphData * 1000) / 1000;
+      csvwrite(csvFileName, graphData);
+      
+      scriptDirectory = fullfile(fileparts(mfilename('fullpath')), 'tuner');
+      tunerFiles = fullfile(scriptDirectory, '*');
+      copyfile(tunerFiles, obj.outputDir);
+      graphData = strjoin(textread(csvFileName, '%s'), ',');
+      graphDataJs = sprintf('graphData = [%s];', graphData);
+
+      graphJsPath = fullfile(obj.outputDir, 'graph.js');
+      if (!exist(graphJsPath, 'file'))
+        f = fopen(graphJsPath, 'w');
+        fwrite(f, graphDataJs);
+        fclose(f);
+      end
     endfunction
   end
 endclassdef

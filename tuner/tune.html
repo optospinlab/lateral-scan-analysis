@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Title of the document</title>
+    <style>
+      img:hover {
+        outline: 1px solid white; z-index: 1000;
+        filter: invert(1);
+        opacity: 0.5;
+      }
+      
+      img {
+        position: absolute;
+        mix-blend-mode: lighten;
+      }
+      
+      img.selected {
+        outline: 2px solid magenta;
+        z-index: 999;
+      }
+      
+      #composite {
+        position: relative;
+      }
+      #tuner {
+        margin-top: 15px;
+        positiion: relative;
+      }
+      
+      #tuner.pair-editor #canvas, #tuner.pair-editor img {
+        visibility: hidden;
+      }
+      
+      #tuner.pair-editor img.selected {
+        visibility: visible;
+        outline: none;
+        mix-blend-mode: normal;
+      }
+      
+      #tuner.pair-editor img.movable {
+        z-index: 10000;
+        opacity: 0.5;
+        filter: invert(1);
+      }
+      
+      #canvas {
+        position: absolute;
+        pointer-events:none;
+        z-index: 10000;
+      }
+      
+      body.download #tuner {
+        /*display: none;*/
+        visibility: hidden;
+      }
+      
+      #downloader {
+        visibility: hidden;
+      }
+      
+      body.download #downloader {
+        visibility: visible;
+      }
+
+      #continue, body.download #download {
+        display: none;
+      }
+      
+      body.download #continue, #download {
+        display: block;
+      }
+      
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="graph.js"></script>
+    <script src="tune.js"></script>
+  </head>
+
+  <body>
+    <button id="download">Download...</button>
+    <button id="continue">Continue editing...</button>
+    <div id="tuner">
+      <canvas id="canvas">
+        
+      </canvas>
+      <div id="composite"></div>
+    </div>
+    
+    <div id="downloader">
+      <h2>Final image</h2>
+      <p>
+        Download through the right-click menu.
+      </p>
+      <canvas id="fuser"></canvas>
+      <div>
+        <h2>Graph data</h2>
+        <p>
+          Copy and paste into <i>graph.js</i>.
+        </p>
+        <textarea id="graph-data" rows="10" cols="80"></textarea>
+      </div>
+    </div>
+  </body>
+</html>
